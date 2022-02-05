@@ -11,6 +11,9 @@ RoutePlanner::RoutePlanner(RouteModel &model, float start_x, float start_y, floa
 
   start_node = &m_Model.FindClosestNode(start_x, start_y);
   end_node = &m_Model.FindClosestNode(end_x, end_y);
+
+  // TODO 2: Use the m_Model.FindClosestNode method to find the closest nodes to the starting and ending coordinates.
+  // Store the nodes you find in the RoutePlanner's start_node and end_node attributes.
 }
 
 // TODO 3: Implement the CalculateHValue method.
@@ -20,7 +23,7 @@ RoutePlanner::RoutePlanner(RouteModel &model, float start_x, float start_y, floa
 
 float RoutePlanner::CalculateHValue(RouteModel::Node const *node)
 {
-  return node->distance(*end_node);
+  return end_node->distance(*node);
 }
 
 // TODO 4: Complete the AddNeighbors method to expand the current node by adding all unvisited neighbors to the open list.
@@ -37,7 +40,7 @@ void RoutePlanner::AddNeighbors(RouteModel::Node *current_node)
   {
     neighbor->visited = true;
     neighbor->h_value = CalculateHValue(neighbor);
-    neighbor->g_value = current_node->g_value + neighbor->distance(*current_node);
+    neighbor->g_value = current_node->g_value + current_node->distance(*neighbor);
     neighbor->parent = current_node;
     open_list.push_back(neighbor);
   }
@@ -87,12 +90,14 @@ std::vector<RouteModel::Node> RoutePlanner::ConstructFinalPath(RouteModel::Node 
     if (node == start_node)
       break;
 
-    distance += node->distance(*(node->parent));
     node = node->parent;
   }
 
   std::reverse(path_found.begin(), path_found.end());
 
+  for (int i = 1; i<path_found.size(); i++) {
+    distance += path_found[i - 1].distance(path_found[i]);
+  }
   // TODO: Implement your solution here.
 
   distance *= m_Model.MetricScale(); // Multiply the distance by the scale of the map to get meters.
@@ -118,7 +123,7 @@ void RoutePlanner::AStarSearch()
   while (open_list.size() > 0)
   {
     RouteModel::Node *current_node = this->NextNode();
-    std::cout << "Current distance from end " << end_node->distance(*current_node) << std::endl;
+
     if (current_node == end_node)
     {
       std::cout << "PATH found" << std::endl;

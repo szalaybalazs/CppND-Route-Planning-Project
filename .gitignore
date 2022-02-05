@@ -7,4 +7,6 @@ test.cpp
 build/
 bin/
 lib/
+thirdparty/clang
+thirdparty/P0267_RefImpl
 .github/**
